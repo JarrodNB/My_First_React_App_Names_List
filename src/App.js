@@ -1,18 +1,15 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
+import BabyList from './BabyList/BabyList';
 
 class App extends Component {
   render() {
     return (
       <div className="App">
-        <div className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h2>Welcome to React</h2>
-        </div>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
+        <h1>Jarrod's Baby Name List</h1>
+        <input type="text"/>
+        <button>Submit Baby Name</button>
+        <BabyList publicId="123test12345"/>
       </div>
     );
   }
