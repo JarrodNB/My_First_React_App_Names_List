@@ -11,7 +11,8 @@ class App extends Component {
     publicId: null,
     babies: null,
     newBabyName: "",
-    errorMessage: null
+    errorMessage: null,
+    sortOrder: null
   }
 
   componentDidMount() {
@@ -67,6 +68,18 @@ class App extends Component {
           publicId: response.data.public_id,
           babies: response.data.babies
         });
+        switch(this.state.sortOrder) {
+          case 'name':
+            this.sortByNameHandler();
+            break;
+          case 'time':
+            this.sortByCreationHandler();
+            break;
+          case 'length':
+            this.sortByLengthHandler();
+            break;
+          default:
+        }
      })
       .catch(response => {
         //to do
@@ -78,6 +91,32 @@ class App extends Component {
       newBabyName: event.target.value,
       errorMessage: null
     });
+  }
+
+  sortByNameHandler = () => {
+    const babies = [...this.state.babies];
+    let sortedBabies = babies.sort(function(a, b) {
+      return a.name.localeCompare(b.name);
+    });
+    this.setState({babies: sortedBabies, sortOrder: 'name'});
+  }
+
+  sortByCreationHandler = () => {
+    const babies = [...this.state.babies];
+    let sortedBabies = babies.sort(function(a, b) {
+      return new Date(b.created_at) - new Date(a.created_at);
+    });
+    this.setState({babies: sortedBabies, sortOrder: 'time'});
+  }
+
+  sortByLengthHandler = () => {
+    const babies = [...this.state.babies];
+    let sortedBabies = babies.sort(function(a, b) {
+      if (a.name.length === b.name.length) return 0;
+      if (a.name.length < b.name.length) return 1;
+      return -1;
+    });
+    this.setState({babies: sortedBabies, sortOrder: 'length'});
   }
 
   render() {
@@ -96,6 +135,22 @@ class App extends Component {
         <button 
           onClick={this.addBabyHandler}>
           Submit Baby Name
+        </button>
+        <br></br>
+        <button
+          className="sorters" 
+          onClick={this.sortByNameHandler}>
+          Sort by Name
+        </button>
+        <button 
+          className="sorters"
+          onClick={this.sortByCreationHandler}>
+          Sort by Time
+        </button>
+        <button 
+          className="sorters"
+          onClick={this.sortByLengthHandler}>
+          Sort by Length
         </button>
         {error}
         <BabyList 

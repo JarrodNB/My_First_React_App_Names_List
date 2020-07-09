@@ -54,7 +54,7 @@ const BabyList = props => {
   }
   return (
     <div className="BabyList">
-      <h2>List id: {props.publicId}</h2>
+      <h2>List Id: {props.publicId}</h2>
       {babyJSX}
     </div>
   );
