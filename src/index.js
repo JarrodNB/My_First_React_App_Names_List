@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import App from './App';
 import './index.css';
 import axios from 'axios';
+import {BrowserRouter} from 'react-router-dom';
 
 axios.defaults.baseURL = 'http://localhost:3000/api/v1';
 
@@ -17,6 +18,8 @@ axios.interceptors.response.use(response => {
 
 
 ReactDOM.render(
-  <App />,
+  <BrowserRouter>
+    <App />
+  </BrowserRouter>,
   document.getElementById('root')
 );
