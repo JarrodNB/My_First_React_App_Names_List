@@ -56,7 +56,6 @@ class App extends Component {
       })
       .catch(error => {
         this.setState({errorMessage: error.response.data.name[0]});
-        console.log(error.response.data.name[0]);
       });
   }
 
@@ -102,6 +101,7 @@ class App extends Component {
         <BabyList 
           publicId={this.state.publicId} 
           babies={this.state.babies}
+          change={this.updateCurrentList}
         />
       </div>
     );
