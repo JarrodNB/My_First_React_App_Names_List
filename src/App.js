@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import './App.css';
-import BabyList from './BabyList/BabyList';
+import BabyList from './containers/BabyList/BabyList';
 import axios from 'axios';
 import { withRouter } from "react-router";
 

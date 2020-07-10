@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './BabyList.css';
-import Baby from '../Baby/Baby';
+import Baby from '../../components/Baby/Baby';
 import axios from 'axios';
 
 const BabyList = props => {
