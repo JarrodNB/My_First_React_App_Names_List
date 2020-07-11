@@ -3,16 +3,40 @@ import './App.css';
 import BabyList from './containers/BabyList/BabyList';
 import axios from 'axios';
 import { withRouter } from "react-router";
+import {connect} from 'react-redux';
+import * as aType from './store/actions';
+import Cable from 'actioncable';
 
 class App extends Component {
 
   state = {
-    id: null,
-    publicId: null,
-    babies: null,
     newBabyName: "",
-    errorMessage: null,
-    sortOrder: null
+    errorMessage: null
+  }
+
+  componentWillUnmount(){
+    this.cable.subscriptions.remove(this.subscription);
+  }
+
+  subscribe = () => {
+    this.cable = Cable.createConsumer(`ws://localhost:3000/cable`);
+    this.subscription = this.cable.subscriptions.create({
+      channel: "BabiesChannel",
+      room: this.props.list_id
+    }, {
+      connected: () => {console.log('WS connected')},
+      disconnected: () => {console.log('WS disconnected')},
+      received: data => {
+        if (data.type === 'new_baby') this.props.onAddBaby(data.baby);
+        if (data.type === 'cross_baby') this.props.onBabyCross(data.baby.id, data.baby.crossed_out);
+      },
+      createBaby: function(newBaby){
+        this.perform("create_baby", {baby: newBaby});
+      },
+      crossBaby: function(baby){
+        this.perform("cross_baby", {baby: baby});
+      }
+    })
   }
 
   componentDidMount() {
@@ -20,11 +44,8 @@ class App extends Component {
     if (queryId){
       axios.get('/lists/' + queryId)
       .then(response => {
-        this.setState({
-          id: response.data.id,
-          publicId: response.data.public_id,
-          babies: response.data.babies
-        });
+        this.props.onCreateList(response.data.id, response.data.public_id, response.data.babies);
+        this.subscribe();
      })
       .catch(response => {
         //to do
@@ -32,12 +53,9 @@ class App extends Component {
     } else {
       axios.get('/lists')
       .then(response => {
-        this.setState({
-          id: response.data.id,
-          publicId: response.data.public_id,
-          babies: response.data.babies
-        });
-        this.props.history.push(`?list_id=${this.state.publicId}`);
+        this.props.onCreateList(response.data.id, response.data.public_id, response.data.babies);
+        this.props.history.push(`?list_id=${this.props.public_id}`);
+        this.subscribe();
     })
       .catch(response => {
         //to do
@@ -48,41 +66,16 @@ class App extends Component {
   addBabyHandler = (event) => {
     const newBaby = {
       name: this.state.newBabyName,
-      list_id: this.state.id
+      list_id: this.props.list_id
     }
     axios.post('babies', newBaby)
       .then(response => {
         this.setState({newBabyName: ""});
-        this.updateCurrentList();
+        this.props.onAddBaby(response.data);
+        this.subscription.createBaby(newBaby);
       })
       .catch(error => {
         this.setState({errorMessage: error.response.data.name[0]});
-      });
-  }
-
-  updateCurrentList = () => {
-    axios.get('/lists/' + this.state.publicId)
-      .then(response => {
-        this.setState({
-          id: response.data.id,
-          publicId: response.data.public_id,
-          babies: response.data.babies
-        });
-        switch(this.state.sortOrder) {
-          case 'name':
-            this.sortByNameHandler();
-            break;
-          case 'time':
-            this.sortByCreationHandler();
-            break;
-          case 'length':
-            this.sortByLengthHandler();
-            break;
-          default:
-        }
-     })
-      .catch(response => {
-        //to do
       });
   }
 
@@ -91,32 +84,6 @@ class App extends Component {
       newBabyName: event.target.value,
       errorMessage: null
     });
-  }
-
-  sortByNameHandler = () => {
-    const babies = [...this.state.babies];
-    let sortedBabies = babies.sort(function(a, b) {
-      return a.name.localeCompare(b.name);
-    });
-    this.setState({babies: sortedBabies, sortOrder: 'name'});
-  }
-
-  sortByCreationHandler = () => {
-    const babies = [...this.state.babies];
-    let sortedBabies = babies.sort(function(a, b) {
-      return new Date(b.created_at) - new Date(a.created_at);
-    });
-    this.setState({babies: sortedBabies, sortOrder: 'time'});
-  }
-
-  sortByLengthHandler = () => {
-    const babies = [...this.state.babies];
-    let sortedBabies = babies.sort(function(a, b) {
-      if (a.name.length === b.name.length) return 0;
-      if (a.name.length < b.name.length) return 1;
-      return -1;
-    });
-    this.setState({babies: sortedBabies, sortOrder: 'length'});
   }
 
   render() {
@@ -139,28 +106,49 @@ class App extends Component {
         <br></br>
         <button
           className="sorters" 
-          onClick={this.sortByNameHandler}>
+          onClick={() => this.props.onOrderBabies('name')}>
           Sort by Name
         </button>
         <button 
           className="sorters"
-          onClick={this.sortByCreationHandler}>
+          onClick={() => this.props.onOrderBabies('time')}>
           Sort by Time
         </button>
         <button 
           className="sorters"
-          onClick={this.sortByLengthHandler}>
+          onClick={() => this.props.onOrderBabies('length')}>
           Sort by Length
         </button>
         {error}
         <BabyList 
-          publicId={this.state.publicId} 
-          babies={this.state.babies}
-          change={this.updateCurrentList}
+          publicId={this.props.public_id}
+          crossBaby={(baby)=>this.subscription.crossBaby(baby)}
         />
       </div>
     );
   }
 }
 
-export default withRouter(App);
+const mapStateToProps = state => {
+  return {
+    list_id: state.list_id,
+    public_id: state.public_id,
+    babies: state.babies
+  };
+};
+
+const mapDispatchToProps = dispatch => {
+  return {
+    onAddBaby: (newBaby) => dispatch({type: aType.ADD_BABY, baby: newBaby}),
+    onCreateList: (list_id, public_id, babies) => dispatch({
+      type: aType.CREATE_LIST, 
+      list_id: list_id,
+      public_id: public_id,
+      babies: babies
+    }),
+    onOrderBabies: (sortOrder) => dispatch({type: aType.ORDER_BABIES, sortOrder: sortOrder}),
+    onBabyCross: (id, crossed_out) => dispatch({type: aType.CROSS_BABY, id: id, crossed_out: crossed_out})
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(App));
