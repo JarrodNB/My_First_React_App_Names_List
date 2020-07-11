@@ -1,13 +1,11 @@
 import * as aType from './actions';
 import sortBabies from '../helpers/sort';
-import { bindActionCreators } from 'redux';
-
 
 const initialState = {
   list_id: null,
   public_id: null,
   babies: [],
-  sortOrder: null
+  sortAsc: [true, true, true]
 }
 
 const reducer = (state = initialState, action) => {
@@ -47,10 +45,11 @@ const reducer = (state = initialState, action) => {
         babies: newBabies
       }
     case aType.ORDER_BABIES:
+      const sorted = sortBabies(state.babies, action.sortOrder, state.sortAsc.slice())
       newState = {
         ...state,
-        babies: sortBabies(state.babies, action.sortOrder),
-        sortOrder: action.sortOrder
+        babies: sorted[0],
+        sortAsc: sorted[1]
       }
       return newState;
     default: 
