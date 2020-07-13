@@ -19,7 +19,7 @@ class App extends Component {
   }
 
   subscribe = () => {
-    this.cable = Cable.createConsumer(`ws://frozen-gorge-38819.herokuapp.com/cable`);
+    this.cable = Cable.createConsumer(`wss://frozen-gorge-38819.herokuapp.com/cable`);
     this.subscription = this.cable.subscriptions.create({
       channel: "BabiesChannel",
       room: this.props.list_id
