@@ -1,0 +1,27 @@
+.Baby {
+  margin: auto;
+  width: 250px;
+  height: 100px;
+  padding: 16px;
+  text-align: center;
+  border: 1px solid #eee;
+  box-shadow: 0 2px 3px #ccc;
+  margin: 10px;
+  box-sizing: border-box;
+  cursor: pointer;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 20px;
+  background: white;
+  border-radius: 50%;
+}
+.cross {
+  background: url(./cross.jpg);
+  background-position: center;
+  background-size: 250px 100px;
+}
+
+.Baby:hover,
+.Baby:active {
+  background-color: #C0DDF5;
+}
