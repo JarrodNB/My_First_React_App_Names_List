@@ -8,16 +8,7 @@ import {createStore} from 'redux';
 import {Provider} from 'react-redux';
 import reducer from './store/reducer';
 
-axios.defaults.baseURL = 'http://localhost:3000/api/v1';
-
-// debugging - remove
-// axios.interceptors.response.use(response => {
-//   console.log(response);
-//   return response;
-// }, error => {
-//   console.log(error);
-//   return Promise.reject(error);
-// });
+axios.defaults.baseURL = 'https://frozen-gorge-38819.herokuapp.com/api/v1';
 
 const store = createStore(reducer);
 

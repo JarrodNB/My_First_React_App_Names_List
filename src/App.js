@@ -19,7 +19,7 @@ class App extends Component {
   }
 
   subscribe = () => {
-    this.cable = Cable.createConsumer(`ws://localhost:3000/cable`);
+    this.cable = Cable.createConsumer(`ws://frozen-gorge-38819.herokuapp.com/cable`);
     this.subscription = this.cable.subscriptions.create({
       channel: "BabiesChannel",
       room: this.props.list_id
@@ -47,23 +47,23 @@ class App extends Component {
         this.props.onCreateList(response.data.id, response.data.public_id, response.data.babies);
         this.subscribe();
      })
-      .catch(response => {
-        //to do
+      .catch(error => {
+        console.log(error);
       });
-    } else {
+    } else { // Returns new list
       axios.get('/lists')
       .then(response => {
         this.props.onCreateList(response.data.id, response.data.public_id, response.data.babies);
         this.props.history.push(`?list_id=${this.props.public_id}`);
         this.subscribe();
     })
-      .catch(response => {
-        //to do
+      .catch(error => {
+        console.log(error);
       });
     }
   }
 
-  addBabyHandler = (event) => {
+  addBabyHandler = () => {
     const newBaby = {
       name: this.state.newBabyName,
       list_id: this.props.list_id
@@ -72,10 +72,11 @@ class App extends Component {
       .then(response => {
         this.setState({newBabyName: ""});
         this.props.onAddBaby(response.data);
-        this.subscription.createBaby(newBaby);
+        this.subscription.createBaby(newBaby); // Notifies Action Cable
       })
       .catch(error => {
-        this.setState({errorMessage: error.response.data.name[0]});
+        if (error.response) this.setState({errorMessage: error.response.data.name[0]});
+        else {console.log(error)}
       });
   }
 

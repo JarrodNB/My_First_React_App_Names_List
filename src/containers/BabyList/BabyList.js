@@ -17,10 +17,10 @@ class BabyList extends Component{
     axios.patch('babies/' + id, baby)
       .then(response =>{
         this.props.onBabyCross(baby.id, baby.crossed_out);
-        this.props.crossBaby(baby);
+        this.props.crossBaby(baby); // Notifies Action Cable of change
       })
       .catch(error => {
-        // to do
+        console.log(error);
     });
   }
   render() {
@@ -42,7 +42,6 @@ class BabyList extends Component{
           }  
         </div>
       )
-      
     }
     return (
       <div className="BabyList">
@@ -51,8 +50,6 @@ class BabyList extends Component{
       </div>
     );
   }
-
-
 }
 
 const mapStateToProps = state => {
