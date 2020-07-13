@@ -1,3 +1,7 @@
+The live demo can be found at https://modest-boyd-01e715.netlify.app/. All functionality was included except for the drag and drop funtionality. Keep in mind that this is the first project I've created using React.
+
+
+
 This project was bootstrapped with [Create React App](https://github.com/facebookincubator/create-react-app).
 
 Below you will find some information on how to perform common tasks.<br>
